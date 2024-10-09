@@ -1,3 +1,4 @@
 # Clear-RAM-Now
-Clear RAM Now
-Windows
+Clear ram
+clear ram windows
+clear ram for windows
