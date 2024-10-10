@@ -1,4 +1,210 @@
-# Clear-RAM-Now
+# Clear-RAM-Now*
+#.bat#&&#.ps1#
 Clear ram
 clear ram windows
-clear ram for windows
+windows ram
+ram windows
+BATCH 1.0a
+
+@echo off
+
+:: BatchGotAdmin
+REM --> Check for Administrator privileges by attempting to access a system-protected file.
+REM If the user doesn't have admin rights, the script will try to elevate itself using UAC.
+nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+REM --> If the error level is not 0, it means the user does not have administrator rights.
+if '%errorlevel%' NEQ '0' (
+echo ===========================================================================
+echo This script requires administrative privileges to run.
+echo Please press any key to request elevation.
+echo ===========================================================================
+pause
+echo Requesting administrative privileges...
+goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+REM Create a temporary VBScript to elevate the script using UAC.
+REM The VBScript runs the same batch file with elevated privileges.
+
+echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+
+REM Run the temporary VBScript to trigger the UAC prompt.
+"%temp%\getadmin.vbs"
+
+REM Once the script has been elevated, delete the temporary VBScript.
+del "%temp%\getadmin.vbs"
+exit /B
+:gotAdmin
+REM The script now runs with admin privileges, so we can proceed with the rest of the operations.
+pushd "%CD%" REM Save the current directory.
+CD /D "%~dp0" REM Change the directory to the script's location.
+
+:--------------------------------------
+
+REM Define variables for paths and file names used in the script.
+
+set "RAMMAP_PATH=%windir%\RAMMap64.exe" REM Path to the RAMMap executable in the Windows directory.
+set "SHORTCUT_NAME=Clear RAM Now.lnk" REM Name of the desktop shortcut that will be created.
+set "DESKTOP_PATH=%USERPROFILE%\Desktop" REM Path to the current user's desktop.
+set "SHORTCUT_PATH=%DESKTOP_PATH%%SHORTCUT_NAME%" REM Full path for the desktop shortcut.
+
+REM Check if RAMMap64.exe already exists in the Windows directory.
+
+if exist "%RAMMAP_PATH%" (
+echo RAMMap64.exe already exists.
+) else (
+REM If RAMMap64.exe does not exist, download and install it.
+
+echo RAMMap64.exe not found. Downloading and installing...
+
+REM Use PowerShell to download the Sysinternals Suite from the official Microsoft URL.
+powershell -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile '%TEMP%\SysinternalsSuite.zip'"
+
+REM Use PowerShell to extract the downloaded ZIP file into the Windows directory.
+powershell -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%TEMP%\SysinternalsSuite.zip' -DestinationPath '%windir%' -Force"
+
+REM After extracting, check if RAMMap64.exe now exists in the Windows directory.
+if exist "%RAMMAP_PATH%" (
+    echo RAMMap64.exe installed successfully.
+) else (
+    REM If something went wrong with the download or extraction, display an error message and exit.
+    echo Failed to install RAMMap64.exe.
+    pause
+    exit
+)
+)
+
+REM Check if the desktop shortcut already exists.
+
+if exist "%SHORTCUT_PATH%" (
+REM If the shortcut already exists, no need to create it again.
+echo Shortcut 'Clear RAM Now' already exists on Desktop.
+) else (
+REM If the shortcut doesn't exist, create it.
+
+echo Creating 'Clear RAM Now' shortcut on Desktop...
+
+REM Use PowerShell to create a new shortcut on the user's desktop that will run RAMMap64.exe with the -Ew argument.
+powershell -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%SHORTCUT_PATH%'); $s.TargetPath = '%windir%\RAMMap64.exe'; $s.Arguments = '-Ew'; $s.IconLocation = '%windir%\RAMMap64.exe'; $s.WorkingDirectory = '%windir%'; $s.Save()"
+
+REM Check if the shortcut was created successfully.
+if exist "%SHORTCUT_PATH%" (
+    echo Shortcut created successfully.
+) else (
+    REM If something went wrong, display an error message.
+    echo Failed to create shortcut.
+)
+)
+
+REM Now, run RAMMap64.exe with the -Ew argument to clear Empty Working Sets and free up memory.
+
+echo Running RAMMap64.exe -Ew to clear Empty Working Sets...
+"%RAMMAP_PATH%" -Ew
+
+REM If the command runs successfully, display a success message.
+echo Memory has been cleared successfully.
+
+REM Pause to allow the user to see the result before the script closes.
+pause
+
+#####################################################################################################
+################
+POWERSHELL 1.0a#
+################
+Check for Administrator privileges
+This block checks if the script is running with administrator rights. If not, it exits with a warning.
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
+Write-Warning "This script needs to be run as Administrator."
+exit
+}
+
+Set strict error handling to stop execution on any errors
+$ErrorActionPreference = 'Stop'
+
+Define the path to RAMMap64.exe in the Windows directory
+This variable holds the path where RAMMap64.exe will be installed or where it should already be located.
+$rammapExe = Join-Path $env:windir "RAMMap64.exe"
+
+Define the desktop shortcut path
+This defines the name and location of the shortcut that will be created on the user's desktop.
+$shortcutName = "Clear RAM Now.lnk"
+$desktopPath = [Environment]::GetFolderPath("Desktop") # Get the user's Desktop path
+$shortcutPath = Join-Path $desktopPath $shortcutName
+
+Check if RAMMap64.exe already exists
+if (Test-Path $rammapExe) {
+# RAMMap64.exe exists, so we don't need to download it
+Write-Host "RAMMap64.exe already exists."
+
+# Check if the "Clear RAM Now" shortcut already exists on the Desktop
+if (-not (Test-Path $shortcutPath)) {
+    # Create a desktop shortcut if it doesn't exist
+    Write-Host "Creating 'Clear RAM Now' shortcut on Desktop..."
+
+    # Use WScript.Shell to create the shortcut
+    # This block creates a shortcut that runs RAMMap64.exe with the -Ew argument, which clears Empty Working Sets.
+    $shell = New-Object -ComObject WScript.Shell
+    $shortcut = $shell.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = "$env:windir\RAMMap64.exe"  # Set the target to RAMMap64.exe
+    $shortcut.Arguments = "-Ew"  # Add the argument to clear Empty Working Sets
+    $shortcut.WorkingDirectory = $env:windir  # Set the working directory to the Windows directory
+    $shortcut.IconLocation = "$env:windir\RAMMap64.exe"  # Set the icon to RAMMap64.exe's icon
+    $shortcut.Save()  # Save the shortcut to the Desktop
+
+    Write-Host "'Clear RAM Now' shortcut created successfully."
+} else {
+    # If the shortcut already exists, notify the user
+    Write-Host "'Clear RAM Now' shortcut already exists on Desktop."
+}
+
+# Run RAMMap64.exe with the -Ew argument to clear Empty Working Sets
+Write-Host "Running RAMMap64.exe -Ew..."
+& $rammapExe -Ew  # Execute RAMMap64.exe with the -Ew argument to clear memory
+} else {
+# If RAMMap64.exe doesn't exist, download and install it
+$zipUrl = "https://download.sysinternals.com/files/SysinternalsSuite.zip" # URL to download the Sysinternals Suite ZIP file
+$zipPath = "$env:TEMP\SysinternalsSuite.zip" # Temporary path to save the downloaded ZIP file
+$destinationPath = $env:windir # Destination path where the ZIP will be extracted (Windows directory)
+
+try {
+    # Download the Sysinternals Suite ZIP file
+    Write-Host "RAMMap64.exe not found. Downloading Sysinternals Suite..."
+    Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath  # Download the ZIP file from the official Sysinternals website
+
+    # Extract the ZIP file to the Windows directory
+    Write-Host "Extracting files to $destinationPath ..."
+    Expand-Archive -LiteralPath $zipPath -DestinationPath $destinationPath -Force  # Extract the contents of the ZIP file to the Windows directory
+
+    # Check if the shortcut needs to be created after downloading RAMMap64.exe
+    if (-not (Test-Path $shortcutPath)) {
+        # Create a desktop shortcut for RAMMap64.exe
+        Write-Host "Creating 'Clear RAM Now' shortcut on Desktop..."
+
+        $shell = New-Object -ComObject WScript.Shell  # Initialize WScript.Shell to create the shortcut
+        $shortcut = $shell.CreateShortcut($shortcutPath)  # Create a new shortcut at the specified path
+        $shortcut.TargetPath = "$env:windir\RAMMap64.exe"  # Set the target to RAMMap64.exe
+        $shortcut.Arguments = "-Ew"  # Add the argument to clear Empty Working Sets
+        $shortcut.WorkingDirectory = $env:windir  # Set the working directory to the Windows directory
+        $shortcut.IconLocation = "$env:windir\RAMMap64.exe"  # Set the icon to RAMMap64.exe's icon
+        $shortcut.Save()  # Save the shortcut to the Desktop
+
+        Write-Host "'Clear RAM Now' shortcut created successfully."
+    } else {
+        # Notify the user if the shortcut already exists
+        Write-Host "'Clear RAM Now' shortcut already exists on Desktop."
+    }
+
+    # Run RAMMap64.exe after installation to clear Empty Working Sets
+    Write-Host "Running RAMMap64.exe to clear Empty Working Sets..."
+    & $rammapExe -Ew  # Execute RAMMap64.exe with the -Ew argument to free memory
+
+    Write-Host "Memory has been cleared successfully."
+} catch {
+    # Catch any errors during the download or installation process and display an error message
+    Write-Error "An error occurred: $_"
+}
+}
+
