@@ -29,7 +29,7 @@ This PowerShell script automates the process of clearing unused memory (Empty Wo
    Save `clearRamNow.ps1` to any folder on your PC (e.g., Downloads).
 
 2. **Right-click** PowerShell and choose **"Run as Administrator"**.
-
+or "powershell.exe -ExecutionPolicy Bypass -File clearRamNow.ps1"
 3. Navigate to the folder where the script is located:
 
    ```powershell
