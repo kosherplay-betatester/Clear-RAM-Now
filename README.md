@@ -34,3 +34,5 @@ or "powershell.exe -ExecutionPolicy Bypass -File clearRamNow.ps1"
 ![image](https://github.com/user-attachments/assets/b0ae7e34-3cb3-4b79-824d-ca8e88499976)
 
 ![image](https://github.com/user-attachments/assets/40d28f62-cb77-4207-a0f8-8e5d017eb856)
+
+## 📥 Happy Gaming
