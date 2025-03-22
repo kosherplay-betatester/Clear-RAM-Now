@@ -26,9 +26,11 @@ This PowerShell script automates the process of clearing unused memory (Empty Wo
 ## 📥 Installation
 
 1. Download the script:  
-   Save `clearRamNow.ps1` to any folder on your PC (e.g., Downloads).
-2. Navigate to the folder where the script is located:
-3. **Right-click** PowerShell and choose **"Run as Administrator"**.
+   Save `clearRamNow.ps1`[View clearRamNow.ps1 on GitHub](https://github.com/kosherplay-betatester/Clear-RAM-Now/blob/main/clearRamNow.ps1)
+ to any folder on your PC (e.g., Downloads).
+   
+3. Navigate to the folder where the script is located:
+4. **Right-click** PowerShell and choose **"Run as Administrator"**.
 or "powershell.exe -ExecutionPolicy Bypass -File clearRamNow.ps1"
 
 ![image](https://github.com/user-attachments/assets/b0ae7e34-3cb3-4b79-824d-ca8e88499976)
